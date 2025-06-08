@@ -65,18 +65,18 @@ router.get('/home', (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password} = req.body;
+    const { username, email, password, role } = req.body;
 
-    if (!username || !email || !password ) {
+    if (!username || !email || !password || !role) {
       return res.render('auth/register', { error: 'All fields are required', success: null });
     }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.render('auth/register', { error: 'Username or email already exists' , success: null});
+      return res.render('auth/register', { error: 'Username or email already exists', success: null });
     }
 
-    const newUser = new User({ username, email, password });
+    const newUser = new User({ username, email, password, role });
     await newUser.save();
 
     res.redirect('/auth/login');
@@ -85,6 +85,7 @@ router.post('/register', async (req, res) => {
     res.render('auth/register', { error: 'Server error occurred', success: null });
   }
 });
+
 
 
 // Logout route
