@@ -1,0 +1,417 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+      <h1>Lead Details</h1>
+      
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3><%= lead.firstName %></h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Status:</strong> 
+                <span class="badge badge-<%= lead.status === 'Completed' ? 'success' : lead.status === 'In Progress' ? 'warning' : 'secondary' %>">
+                  <%= lead.status %>
+                </span>
+              </p>
+              <p><strong>Assigned To:</strong> <%= lead.assignedTo?.username || 'N/A' %></p>
+              <p><strong>Created By:</strong> <%= lead.createdBy?.username || 'N/A' %></p>
+              <p><strong>Email:</strong> <%= lead.email || 'N/A' %></p>
+              <p><strong>Phone:</strong> <%= lead.phone || 'N/A' %></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Visa Type:</strong> <%= lead.visaType || 'N/A' %></p>
+              <p><strong>Payment Status:</strong> 
+                <span class="badge badge-<%= lead.paymentStatus === 'Full' ? 'success' : lead.paymentStatus === 'Partial' ? 'warning' : 'danger' %>">
+                  <%= lead.paymentStatus || 'Pending' %>
+                </span>
+              </p>
+              <p><strong>Created At:</strong> <%= lead.createdAt.toLocaleString() %></p>
+              <p><strong>Updated At:</strong> <%= lead.updatedAt ? lead.updatedAt.toLocaleString() : 'N/A' %></p>
+            </div>
+          </div>
+          <% if (lead.description) { %>
+            <div class="mt-3">
+              <p><strong>Description:</strong></p>
+              <p class="text-muted"><%= lead.description %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5>Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <a href="/leads/edit/<%= lead._id %>" class="btn btn-primary btn-sm btn-block mb-2">Edit Lead</a>
+          <% if (user.role === 'admin') { %>
+            <button onclick="deleteLead('<%= lead._id %>')" class="btn btn-danger btn-sm btn-block mb-2">Delete Lead</button>
+          <% } %>
+          <a href="/leads" class="btn btn-secondary btn-sm btn-block">← Back to Leads</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Section -->
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h4>Notes</h4>
+        </div>
+        <div class="card-body">
+          <% if (lead.notes && lead.notes.length > 0) { %>
+            <div class="notes-list mb-3">
+              <% lead.notes.forEach(note => { %>
+                <div class="note-item border-bottom pb-2 mb-2">
+                  <div class="d-flex justify-content-between">
+                    <strong><%= note.createdBy?.username || 'Unknown' %></strong>
+                    <small class="text-muted"><%= new Date(note.createdAt).toLocaleString() %></small>
+                  </div>
+                  <p class="mt-1 mb-0"><%= note.content %></p>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <p class="text-muted">No notes added yet.</p>
+          <% } %>
+
+          <!-- Add Note Form -->
+          <form id="noteForm" onsubmit="addNote(event)">
+            <div class="form-group">
+              <textarea 
+                name="content" 
+                class="form-control" 
+                rows="3" 
+                required 
+                placeholder="Add a note..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Add Note</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files Section -->
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4>Files</h4>
+          <button class="btn btn-primary btn-sm" data-toggle="collapse" data-target="#uploadForm">
+            Upload File
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- File Upload Form -->
+          <div class="collapse mb-3" id="uploadForm">
+            <div class="card">
+              <div class="card-body">
+                <form id="fileUploadForm" enctype="multipart/form-data" onsubmit="uploadFile(event)">
+                  <div class="form-group">
+                    <label for="file">Choose File:</label>
+                    <input 
+                      type="file" 
+                      name="file" 
+                      id="file" 
+                      class="form-control-file" 
+                      required
+                      accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.xlsx,.xls">
+                    <small class="form-text text-muted">
+                      Allowed file types: Images (JPG, PNG, GIF), Documents (PDF, DOC, DOCX, TXT, XLSX, XLS). Max size: 10MB
+                    </small>
+                  </div>
+                  <div class="form-group">
+                    <label for="description">Description (optional):</label>
+                    <input 
+                      type="text" 
+                      name="description" 
+                      id="description" 
+                      class="form-control" 
+                      placeholder="Brief description of the file">
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-success" id="uploadBtn">
+                      <span id="uploadSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                      Upload File
+                    </button>
+                    <button type="button" class="btn btn-secondary ml-2" data-toggle="collapse" data-target="#uploadForm">
+                      Cancel
+                    </button>
+                  </div>
+                  <div id="uploadProgress" class="progress d-none mb-2">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Files List -->
+          <div id="filesList">
+            <% if (files && files.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>File Name</th>
+                      <th>Description</th>
+                      <th>Uploaded By</th>
+                      <th>Upload Date</th>
+                      <th>Size</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% files.forEach(file => { %>
+                      <tr id="file-<%= file._id %>">
+                        <td>
+                          <i class="fas fa-<%= getFileIcon(file.mimetype) %>"></i>
+                          <%= file.originalName %>
+                        </td>
+                        <td><%= file.description || '-' %></td>
+                        <td><%= file.uploadedBy?.username || 'Unknown' %></td>
+                        <td><%= new Date(file.createdAt).toLocaleString() %></td>
+                        <td><%= formatFileSize(file.size) %></td>
+                        <td>
+                          <a href="/files/download/<%= file._id %>" class="btn btn-sm btn-outline-primary" title="Download">
+                            <i class="fas fa-download"></i>
+                          </a>
+                          <% if (user.role === 'admin' || file.uploadedBy._id.toString() === user._id.toString()) { %>
+                            <button onclick="deleteFile('<%= file._id %>')" class="btn btn-sm btn-outline-danger ml-1" title="Delete">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="text-center text-muted py-4">
+                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                <p>No files uploaded yet.</p>
+                <p>Click "Upload File" to add documents, images, or other files to this lead.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div id="messages"></div>
+
+<script>
+// Helper functions for file handling
+function getFileIcon(mimetype) {
+  if (mimetype.includes('image')) return 'file-image';
+  if (mimetype.includes('pdf')) return 'file-pdf';
+  if (mimetype.includes('word') || mimetype.includes('document')) return 'file-word';
+  if (mimetype.includes('excel') || mimetype.includes('spreadsheet')) return 'file-excel';
+  return 'file';
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Show message function
+function showMessage(message, type = 'success') {
+  const messagesDiv = document.getElementById('messages');
+  const alertHtml = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  `;
+  messagesDiv.innerHTML = alertHtml;
+  
+  // Auto dismiss after 5 seconds
+  setTimeout(() => {
+    const alert = messagesDiv.querySelector('.alert');
+    if (alert) {
+      $(alert).alert('close');
+    }
+  }, 5000);
+}
+
+// Add note function
+async function addNote(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const content = form.content.value.trim();
+  
+  if (!content) {
+    showMessage('Please enter a note content.', 'warning');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/leads/<%= lead._id %>/notes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showMessage('Note added successfully!');
+      form.reset();
+      setTimeout(() => {
+        location.reload(); // Reload to show the new note
+      }, 1000);
+    } else {
+      showMessage(result.error || 'Error adding note', 'danger');
+    }
+  } catch (error) {
+    console.error('Error adding note:', error);
+    showMessage('Error adding note. Please try again.', 'danger');
+  }
+}
+
+// Upload file function
+async function uploadFile(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  const uploadBtn = document.getElementById('uploadBtn');
+  const uploadSpinner = document.getElementById('uploadSpinner');
+  const progressBar = document.getElementById('uploadProgress');
+  
+  // Show loading state
+  uploadBtn.disabled = true;
+  uploadSpinner.classList.remove('d-none');
+  progressBar.classList.remove('d-none');
+  
+  try {
+    const response = await fetch(`/files/upload/<%= lead._id %>`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showMessage('File uploaded successfully!');
+      form.reset();
+      $('#uploadForm').collapse('hide');
+      setTimeout(() => {
+        location.reload(); // Reload to show the new file
+      }, 1000);
+    } else {
+      showMessage(result.error || 'Error uploading file', 'danger');
+    }
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    showMessage('Error uploading file. Please try again.', 'danger');
+  } finally {
+    // Reset loading state
+    uploadBtn.disabled = false;
+    uploadSpinner.classList.add('d-none');
+    progressBar.classList.add('d-none');
+  }
+}
+
+// Delete file function
+async function deleteFile(fileId) {
+  if (!confirm('Are you sure you want to delete this file?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/files/${fileId}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showMessage('File deleted successfully!');
+      document.getElementById(`file-${fileId}`).remove();
+      
+      // Check if no files left
+      const tbody = document.querySelector('#filesList tbody');
+      if (tbody && tbody.children.length === 0) {
+        location.reload(); // Reload to show "no files" message
+      }
+    } else {
+      showMessage(result.error || 'Error deleting file', 'danger');
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    showMessage('Error deleting file. Please try again.', 'danger');
+  }
+}
+
+// Delete lead function (admin only)
+async function deleteLead(leadId) {
+  if (!confirm('Are you sure you want to delete this lead? This action cannot be undone.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/leads/${leadId}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showMessage('Lead deleted successfully!');
+      setTimeout(() => {
+        window.location.href = '/leads';
+      }, 1000);
+    } else {
+      showMessage(result.error || 'Error deleting lead', 'danger');
+    }
+  } catch (error) {
+    console.error('Error deleting lead:', error);
+    showMessage('Error deleting lead. Please try again.', 'danger');
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>
+
+<%
+// Helper function for file icons (server-side)
+function getFileIcon(mimetype) {
+  if (mimetype.includes('image')) return 'file-image';
+  if (mimetype.includes('pdf')) return 'file-pdf';
+  if (mimetype.includes('word') || mimetype.includes('document')) return 'file-word';
+  if (mimetype.includes('excel') || mimetype.includes('spreadsheet')) return 'file-excel';
+  return 'file';
+}
+
+// Helper function for file size formatting (server-side)
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+%>

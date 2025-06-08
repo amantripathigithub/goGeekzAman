@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<h3>Edit Lead</h3>
+<form method="POST" action="/leads/edit/<%= lead._id %>">
+  <div class="mb-3">
+    <label>Name</label>
+    <input name="name" class="form-control" value="<%= lead.firstName %>" required>
+  </div>
+  <div class="mb-3">
+    <label>Email</label>
+    <input name="email" type="email" class="form-control" value="<%= lead.email %>" required>
+  </div>
+  <div class="mb-3">
+    <label>Phone</label>
+    <input name="phone" class="form-control" value="<%= lead.phone %>" required>
+  </div>
+  <% if (user.role === 'admin') { %>
+    <div class="mb-3">
+      <label>Assign To</label>
+      <select name="assignedTo" class="form-select">
+        <% users.forEach(u => { %>
+          <option value="<%= u._id %>" <%= lead.assignedTo?.toString() === u._id.toString() ? 'selected' : '' %>><%= u.username %></option>
+        <% }) %>
+      </select>
+    </div>
+  <% } %>
+  <div class="mb-3">
+    <label>Payment Status</label>
+    <select name="paymentStatus" class="form-select">
+      <option <%= lead.paymentStatus === 'Not Paid' ? 'selected' : '' %>>Not Paid</option>
+      <option <%= lead.paymentStatus === 'Partial' ? 'selected' : '' %>>Partial</option>
+      <option <%= lead.paymentStatus === 'Full' ? 'selected' : '' %>>Full</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Update</button>
+</form>
+<%- include('../partials/footer') %>

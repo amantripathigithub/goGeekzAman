@@ -1,0 +1,14 @@
+<%- include('../partials/header') %>
+<h3>Upload File for Lead</h3>
+<form action="/files/upload/<%= leadId %>" method="POST" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label>Select File</label>
+    <input type="file" name="file" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Note (Optional)</label>
+    <input name="description" class="form-control" />
+  </div>
+  <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+<%- include('../partials/footer') %>

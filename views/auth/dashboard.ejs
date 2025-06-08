@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<h2>Welcome, <%= user.username %></h2>
+<hr />
+<div class="row">
+  <div class="col-md-3"><a href="/leads/create" class="btn btn-success w-100 mb-2">+ Create Lead</a></div>
+</div>
+
+<h4 class="mt-4">Recent Leads</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Payment</th>
+      <th>Assigned To</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% leads.forEach(lead => { %>
+      <tr>
+        <td><%= lead.firstName %></td>
+        <td><%= lead.phone %></td>
+        <td><span class="badge bg-<%= lead.paymentStatus === 'Full' ? 'success' : lead.paymentStatus === 'Partial' ? 'warning' : 'danger' %>"><%= lead.paymentStatus %></span></td>
+        <td><%= lead.assignedTo?.username || 'Unassigned' %></td>
+        <td>
+          <a class="btn btn-sm btn-primary" href="/leads/<%= lead._id %>">View</a>
+          <% if (user.role === 'admin') { %>
+            <a class="btn btn-sm btn-secondary" href="/leads/edit/<%= lead._id %>">Edit</a>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('../partials/footer') %>

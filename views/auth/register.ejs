@@ -1,0 +1,37 @@
+<%- include('../partials/header', { user }) %>
+
+<div class="container mt-5">
+  <h2>Register User</h2>
+
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+  <% if (success) { %>
+    <div class="alert alert-success"><%= success %></div>
+  <% } %>
+
+  <form method="POST" action="/auth/register">
+    <div class="mb-3">
+      <label for="username">Username</label>
+      <input name="username" type="text" class="form-control" required />
+    </div>
+    <div class="mb-3">
+      <label for="email">Email</label>
+      <input name="email" type="email" class="form-control" required />
+    </div>
+    <div class="mb-3">
+      <label for="password">Password</label>
+      <input name="password" type="password" class="form-control" required />
+    </div>
+    <div class="mb-3">
+      <label for="role">Role</label>
+      <select name="role" class="form-control">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

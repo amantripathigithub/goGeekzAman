@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+<h3>All Leads</h3>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th>Assigned</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% leads.forEach(lead => { %>
+      <tr>
+        <td><%= lead.firstName %></td>
+        <td><%= lead.phone %></td>
+        <td><%= lead.email %></td>
+        <td><%= lead.status %></td>
+        <td><%= lead.assignedTo?.username || 'Unassigned' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('../partials/footer') %>

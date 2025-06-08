@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+<h3>Create New Lead</h3>
+<form method="POST" action="/leads/create">
+  <div class="mb-3">
+    <label>First Name</label>
+    <input name="firstName" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Last Name</label>
+    <input name="lastName" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Email</label>
+    <input name="email" type="email" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Phone</label>
+    <input name="phone" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Country</label>
+    <input name="country" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label>Visa Type</label>
+    <select name="visaType" class="form-select" required>
+      <% visaTypes.forEach(type => { %>
+        <option value="<%= type %>"><%= type %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label>Status</label>
+    <select name="status" class="form-select" required>
+      <% statuses.forEach(status => { %>
+        <option value="<%= status %>"><%= status %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <% if (user.role === 'admin') { %>
+    <div class="mb-3">
+      <label>Assign To</label>
+      <select name="assignedTo" class="form-select">
+        <% users.forEach(u => { %>
+          <option value="<%= u._id %>"><%= u.username %></option>
+        <% }) %>
+      </select>
+    </div>
+  <% } %>
+
+  <div class="mb-3">
+    <label>Payment Status</label>
+    <select name="paymentStatus" class="form-select" required>
+      <% paymentStatuses.forEach(payment => { %>
+        <option value="<%= payment %>"><%= payment %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-success">Save Lead</button>
+</form>
+<%- include('../partials/footer') %>
